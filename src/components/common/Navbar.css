@@ -1,0 +1,120 @@
+/* General Navbar Styles */
+.navbar {
+  height: 56px;
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: white;
+  border-bottom: 1px solid #ddd;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  position: relative;
+  flex-wrap: nowrap;
+  z-index: 1000;
+}
+
+.navbar-logo a {
+  font-size: 24px;
+  font-weight: bold;
+  color: black;
+  text-decoration: none;
+}
+
+/* Navigation Menu */
+.navbar-menu {
+  display: flex;
+  list-style: none;
+  gap: 30px;
+}
+
+.navbar-menu li a {
+  color: #333;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.navbar-menu li a:hover {
+  color: #fa8c16;
+}
+
+/* Right section: Buttons + Icon */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Auth buttons */
+.auth-button {
+  border: 1px solid #fa8c16;
+  color: #fa8c16;
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background-color: transparent;
+}
+
+.auth-button:hover {
+  background-color: #fa8c16;
+  color: white;
+}
+
+/* Hamburger menu button */
+.menu-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: none;
+}
+
+/* Icon size */
+.menu-toggle svg {
+  font-size: 24px;
+  color: #333;
+}
+
+/* Responsive - Small screens */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 20px;
+  }
+
+  .navbar-menu {
+    position: absolute;
+    top: 56px; /* same as navbar height */
+    left: 0;
+    right: 0;
+    background-color: white;
+    flex-direction: column;
+    gap: 0;
+    border-top: 1px solid #eee;
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.3s ease;
+  }
+
+  .navbar-menu.open {
+    max-height: 300px; /* adjust as needed */
+  }
+
+  .navbar-menu li {
+    padding: 12px 20px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .navbar-menu li a {
+    font-size: 16px;
+  }
+
+  .navbar-right {
+    order: 2;
+    gap: 10px;
+  }
+
+  .menu-toggle {
+    display: block;
+    margin-left: auto;
+  }
+}

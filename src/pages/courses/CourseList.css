@@ -1,0 +1,256 @@
+.course-list-wrapper {
+  padding: 24px;
+}
+
+.custom-card {
+  height: 460px;
+  overflow: hidden;
+  border-radius: 12px;
+  transition: transform 0.3s;
+  max-width: 100%;
+}
+
+.custom-card:hover {
+  transform: translateY(-6px);
+}
+
+.thumbnail-wrapper {
+  position: relative;
+}
+
+.course-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background-color: #000;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  z-index: 1;
+  opacity: 0.85;
+}
+
+.instructor {
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 4px;
+}
+
+.price-rating {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.price {
+  font-weight: bold;
+  color: #1890ff;
+}
+
+.filter-panel {
+  background: #f9f9f9;
+  padding: 16px 40px;
+  border-radius: 10px;
+  min-height: 600px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 24px;
+}
+
+.filter-section {
+  margin-bottom: 20px;
+}
+
+.filter-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.6s ease-in-out both;
+}
+
+.slide-in-right {
+  animation: slideInRight 0.6s ease-in-out both;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.thumbnail-container {
+  position: relative;
+}
+
+.badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: #1677ff;
+  color: white;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.thumbnail-wrapper {
+  height: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  background: #f0f0f0;
+  border-bottom: 1px solid #eee;
+}
+
+.thumbnail-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* New Style Adjustments for Column Layout */
+.course-list-wrapper {
+  padding: 24px;
+}
+
+.custom-card {
+  height: 480px;
+  overflow: hidden;
+  border-radius: 12px;
+  transition: transform 0.3s;
+  max-width: 100%;
+}
+
+.custom-card:hover {
+  transform: translateY(-6px);
+}
+
+.filter-panel {
+  background: #f9f9f9;
+  padding: 16px 40px;
+  border-radius: 10px;
+  min-height: 600px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 24px;
+}
+
+/* Adjust column layout */
+.course-list-wrapper .ant-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.course-list-wrapper .ant-col {
+  display: block;
+}
+
+.course-list-wrapper .ant-col-md-18,
+.course-list-wrapper .ant-col-lg-19 {
+  flex: 0 0 75%; /* Course Cards section takes 75% of width */
+}
+
+.course-list-wrapper .ant-col-md-6,
+.course-list-wrapper .ant-col-lg-5 {
+  flex: 0 0 25%; /* Filter Panel takes 25% of width */
+}
+
+/* Adjust Course Card Layout */
+.custom-card {
+  width: 100%;
+  max-width: 100%;
+}
+
+.custom-card:hover {
+  transform: translateY(-6px);
+}
+
+.thumbnail-wrapper {
+  position: relative;
+}
+
+.thumbnail-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Course Grid */
+.course-list-wrapper .ant-row .ant-col-xs-24 {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.course-list-wrapper .ant-row .ant-col-sm-12 {
+  width: 50%;
+}
+
+.course-list-wrapper .ant-row .ant-col-md-12 {
+  width: 50%;
+}
+
+.course-list-wrapper .ant-row .ant-col-lg-12 {
+  width: 33.33%; /* Display 2 cards per row */
+}
+
+.course-list-wrapper .ant-row .ant-col-xl-8 {
+  width: 33.33%; /* Display 2 cards per row */
+}
+
+/* Adjusting the Filter Panel */
+.filter-panel {
+  background: #f9f9f9;
+  padding: 16px 40px;
+  border-radius: 10px;
+  min-height: 600px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 24px;
+}
+
+/* Make Empty State Larger */
+.ant-empty {
+  transform: scale(1.2);
+  text-align: center;
+  margin-top: 60px;
+}
