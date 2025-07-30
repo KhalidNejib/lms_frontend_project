@@ -1,117 +1,156 @@
-import React, { useState } from 'react';
-import Layout from '../../components/common/Layout';
+import React, { useState, useEffect } from 'react';
+import { Layout, Upload, Button, List, Card, Modal, message, Spin } from 'antd';
+import { PlusOutlined, UploadOutlined, DeleteOutlined, EyeOutlined, ReloadOutlined } from '@ant-design/icons';
+
+const { Content } = Layout;
+
+interface UploadedFile {
+  id: string;
+  name: string;
+  url: string;
+  type: string;
+}
 
 const MediaLibrary: React.FC = () => {
-  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+  const [fileList, setFileList] = useState<any[]>([]);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [previewVisible, setPreviewVisible] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [loadingFiles, setLoadingFiles] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
 
-  const mediaItems = [
-    { id: 1, name: 'react-intro.mp4', type: 'video', size: '45.2 MB', uploaded: '2024-01-15' },
-    { id: 2, name: 'javascript-basics.pdf', type: 'pdf', size: '2.1 MB', uploaded: '2024-01-14' },
-    { id: 3, name: 'ui-design-guide.png', type: 'image', size: '1.8 MB', uploaded: '2024-01-13' },
-    { id: 4, name: 'course-overview.mp4', type: 'video', size: '128.5 MB', uploaded: '2024-01-12' },
-    { id: 5, name: 'assignment-template.docx', type: 'document', size: '0.5 MB', uploaded: '2024-01-11' },
-  ];
-
-  const handleFileSelect = (fileId: string) => {
-    setSelectedFiles(prev => 
-      prev.includes(fileId) 
-        ? prev.filter(id => id !== fileId)
-        : [...prev, fileId]
-    );
+  // Fetch uploaded files from backend
+  const fetchUploadedFiles = async () => {
+    setLoadingFiles(true);
+    try {
+      const res = await fetch('/api/upload/list');
+      if (!res.ok) throw new Error('Failed to fetch uploaded files');
+      const data = await res.json();
+      setUploadedFiles(data);
+    } catch (err) {
+      message.error('Could not load uploaded files.');
+    } finally {
+      setLoadingFiles(false);
+    }
   };
 
-  const getFileIcon = (type: string) => {
-    switch (type) {
-      case 'video': return 'bi bi-camera-video';
-      case 'pdf': return 'bi bi-file-pdf';
-      case 'image': return 'bi bi-image';
-      case 'document': return 'bi bi-file-text';
-      default: return 'bi bi-file';
+  useEffect(() => {
+    fetchUploadedFiles();
+  }, []);
+
+  const handleChange = ({ fileList: newFileList }: any) => {
+    setFileList(newFileList);
+  };
+
+  const handlePreview = async (file: any) => {
+    setPreviewImage(file.thumbUrl || file.url);
+    setPreviewVisible(true);
+  };
+
+  const handleUpload = async () => {
+    setUploading(true);
+    const formData = new FormData();
+    fileList.forEach((file: any) => {
+      formData.append('files', file.originFileObj);
+    });
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!res.ok) throw new Error('Upload failed');
+      message.success('Files uploaded successfully!');
+      setFileList([]);
+      fetchUploadedFiles();
+    } catch (err) {
+      message.error('Upload failed.');
+    } finally {
+      setUploading(false);
     }
   };
 
   return (
-    <Layout>
-      <div className="container-fluid py-4">
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <h1 className="h2">Media Library</h1>
-          <div className="btn-group" role="group">
-            <button className="btn btn-primary">
-              <i className="bi bi-upload me-2"></i>
-              Upload Files
-            </button>
-            <button className="btn btn-outline-danger" disabled={selectedFiles.length === 0}>
-              <i className="bi bi-trash me-2"></i>
-              Delete Selected
-            </button>
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="col-md-3">
-            <div className="card shadow">
-              <div className="card-header">
-                <h6 className="card-title mb-0">Filters</h6>
-              </div>
-              <div className="card-body">
-                <div className="mb-3">
-                  <label className="form-label">File Type</label>
-                  <select className="form-select">
-                    <option value="">All Types</option>
-                    <option value="video">Video</option>
-                    <option value="pdf">PDF</option>
-                    <option value="image">Image</option>
-                    <option value="document">Document</option>
-                  </select>
-                </div>
-                <div className="mb-3">
-                  <label className="form-label">Date Range</label>
-                  <input type="date" className="form-control mb-2" />
-                  <input type="date" className="form-control" />
-                </div>
-                <button className="btn btn-outline-primary w-100">Apply Filters</button>
-              </div>
+    <Layout style={{ minHeight: '100vh' }}>
+      <Content style={{ margin: '24px 16px 0' }}>
+        <div style={{ padding: 24, background: '#fff', minHeight: 360 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+            <h1 style={{ margin: 0 }}>Media Library</h1>
+            <div>
+              <Button
+                icon={<ReloadOutlined />}
+                style={{ marginRight: 8 }}
+                onClick={fetchUploadedFiles}
+                disabled={loadingFiles}
+              >
+                Refresh
+              </Button>
+              <Button
+                type="primary"
+                icon={<UploadOutlined />}
+                onClick={handleUpload}
+                disabled={fileList.length === 0}
+                loading={uploading}
+              >
+                Upload
+              </Button>
             </div>
           </div>
+          <Upload.Dragger
+            multiple
+            fileList={fileList}
+            onChange={handleChange}
+            beforeUpload={() => false} // Prevent auto upload
+            listType="picture-card"
+            onPreview={handlePreview}
+            style={{ marginBottom: 24 }}
+          >
+            <p className="ant-upload-drag-icon">
+              <PlusOutlined />
+            </p>
+            <p className="ant-upload-text">Drag & drop files here, or click to select</p>
+          </Upload.Dragger>
+          <Modal
+            open={previewVisible}
+            footer={null}
+            onCancel={() => setPreviewVisible(false)}
+          >
+            <img alt="preview" style={{ width: '100%' }} src={previewImage || ''} />
+          </Modal>
+          <div style={{ marginTop: 32 }}>
+            <h3>Uploaded Files</h3>
+            {loadingFiles ? (
+              <Spin />
+            ) : uploadedFiles.length === 0 ? (
+              <p className="text-muted">No files uploaded yet.</p>
+            ) : (
+              <List
+                grid={{ gutter: 16, column: 4 }}
+                dataSource={uploadedFiles}
+                renderItem={item => (
+                  <List.Item>
+ <Card
+  cover={
+    <img alt={item.name} src={item.url} style={{ height: 120, objectFit: 'cover' }} />
+  }
+  actions={[
+    <EyeOutlined
+      key="view"
+      onClick={() => {
+        setPreviewImage(item.url);
+        setPreviewVisible(true);
+      }}
+    />,
+    <DeleteOutlined key="delete" />,
+  ]}
+/>
 
-          <div className="col-md-9">
-            <div className="card shadow">
-              <div className="card-header">
-                <h6 className="card-title mb-0">Media Files</h6>
-              </div>
-              <div className="card-body">
-                <div className="row">
-                  {mediaItems.map((item) => (
-                    <div key={item.id} className="col-md-4 col-lg-3 mb-3">
-                      <div className={`card h-100 ${selectedFiles.includes(item.id.toString()) ? 'border-primary' : ''}`}>
-                        <div className="card-body text-center">
-                          <div className="form-check position-absolute top-0 start-0 m-2">
-                            <input
-                              className="form-check-input"
-                              type="checkbox"
-                              checked={selectedFiles.includes(item.id.toString())}
-                              onChange={() => handleFileSelect(item.id.toString())}
-                            />
-                          </div>
-                          <i className={`${getFileIcon(item.type)} fa-3x text-muted mb-2`}></i>
-                          <h6 className="card-title small">{item.name}</h6>
-                          <p className="card-text small text-muted">
-                            {item.size} • {item.uploaded}
-                          </p>
-                          <div className="btn-group btn-group-sm w-100" role="group">
-                            <button className="btn btn-outline-primary">View</button>
-                            <button className="btn btn-outline-secondary">Download</button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+                  </List.Item>
+                )}
+              />
+            )}
           </div>
         </div>
-      </div>
+      </Content>
     </Layout>
   );
 };

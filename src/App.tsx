@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   createBrowserRouter,
   createRoutesFromElements,
@@ -21,6 +22,9 @@ import ContentManager from './pages/cms/ContentManager';
 import MediaLibrary from './pages/cms/MediaLibrary';
 import Layout from './components/common/Layout';
 
+import MediaManager from './components/Midia/MidiaManager';
+import PageViewer from './pages/cms/PageViewer';
+
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<Layout />}>
@@ -41,6 +45,9 @@ const router = createBrowserRouter(
       {/* CMS */}
       <Route path="/cms/content" element={<ContentManager />} />
       <Route path="/cms/media" element={<MediaLibrary />} />
+      <Route path="/admin/media" element={<MediaManager />} />
+      <Route path="/pages/:slug" element={<PageViewer />} />
+
 
       {/* Redirect root to dashboard */}
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
