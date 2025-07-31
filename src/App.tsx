@@ -20,6 +20,7 @@ import CoursePlayer from './pages/courses/CoursePlayer';
 import ContentManager from './pages/cms/ContentManager';
 import MediaLibrary from './pages/cms/MediaLibrary';
 import Layout from './components/common/Layout';
+import CMSPage from './pages/cms/CMSPage';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -39,7 +40,7 @@ const router = createBrowserRouter(
       <Route path="/courses/:id/player" element={<CoursePlayer />} />
 
       {/* CMS */}
-      <Route path="/cms/content" element={<ContentManager />} />
+      <Route path="/cms/content" element={<CMSPage />} />
       <Route path="/cms/media" element={<MediaLibrary />} />
 
       {/* Redirect root to dashboard */}

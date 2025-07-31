@@ -1,73 +1,55 @@
-import React, { useState } from 'react';
+import React, { useEffect } from "react";
+import { Form, Input, Button, Select } from "antd";
+import type { CMSPage } from "../../types/CMSPage"
 
-interface ContentFormProps {
-  onSubmit: (contentData: any) => void;
-  initialData?: any;
+interface Props {
+  initialValues?: CMSPage | null;
+  onSubmit: (values: CMSPage) => void;
+  onCancel?: () => void;
 }
 
-const ContentForm: React.FC<ContentFormProps> = ({ onSubmit, initialData }) => {
-  const [title, setTitle] = useState(initialData?.title || '');
-  const [content, setContent] = useState(initialData?.content || '');
-  const [type, setType] = useState(initialData?.type || 'text');
+const CMSForm: React.FC<Props> = ({ initialValues, onSubmit, onCancel }) => {
+  const [form] = Form.useForm();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit({ title, content, type });
+  useEffect(() => {
+    if (initialValues) {
+      form.setFieldsValue(initialValues);
+    } else {
+      form.resetFields();
+    }
+  }, [initialValues]);
+
+  const handleFinish = (values: CMSPage) => {
+    onSubmit(values);
+    form.resetFields();
   };
 
   return (
-    <form onSubmit={handleSubmit} className="needs-validation" noValidate>
-      <div className="mb-3">
-        <label htmlFor="title" className="form-label">Content Title</label>
-        <input
-          type="text"
-          className="form-control"
-          id="title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
-        <div className="invalid-feedback">
-          Please enter a content title.
-        </div>
-      </div>
-      <div className="mb-3">
-        <label htmlFor="type" className="form-label">Content Type</label>
-        <select
-          className="form-select"
-          id="type"
-          value={type}
-          onChange={(e) => setType(e.target.value)}
-          required
-        >
-          <option value="text">Text</option>
-          <option value="video">Video</option>
-          <option value="pdf">PDF</option>
-          <option value="quiz">Quiz</option>
-        </select>
-        <div className="invalid-feedback">
-          Please select a content type.
-        </div>
-      </div>
-      <div className="mb-3">
-        <label htmlFor="content" className="form-label">Content</label>
-        <textarea
-          className="form-control"
-          id="content"
-          rows={6}
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          required
-        />
-        <div className="invalid-feedback">
-          Please enter content.
-        </div>
-      </div>
-      <button type="submit" className="btn btn-primary">
-        Save Content
-      </button>
-    </form>
+    <Form form={form} layout="vertical" onFinish={handleFinish}>
+      <Form.Item label="Title" name="title" rules={[{ required: true }]}>
+        <Input />
+      </Form.Item>
+      <Form.Item label="Slug" name="slug" rules={[{ required: true }]}>
+        <Input />
+      </Form.Item>
+      <Form.Item label="Content" name="content">
+        <Input.TextArea rows={5} />
+      </Form.Item>
+      <Form.Item label="Status" name="status" rules={[{ required: true }]}>
+        <Select options={[{ value: "draft" }, { value: "published" }]} />
+      </Form.Item>
+      <Form.Item>
+        <Button type="primary" htmlType="submit">
+          {initialValues ? "Update" : "Create"}
+        </Button>
+        {initialValues && (
+          <Button onClick={onCancel} style={{ marginLeft: 10 }}>
+            Cancel
+          </Button>
+        )}
+      </Form.Item>
+    </Form>
   );
 };
 
-export default ContentForm; 
+export default CMSForm;
