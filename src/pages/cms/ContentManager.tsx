@@ -1,19 +1,15 @@
 import React, { useState } from 'react';
-import Layout from '../../components/common/Layout';
+import { useContent } from '../../hooks/useContent';
+import Layout from '../../components/common/Layout'
 import ContentForm from '../../components/forms/ContentForm';
 import DataTable from '../../components/ui/DataTable';
 import Modal from '../../components/ui/Modal';
 
 const ContentManager: React.FC = () => {
+
   const [showModal, setShowModal] = useState(false);
   const [editingContent, setEditingContent] = useState<any>(null);
-
-  const contentItems = [
-    { id: 1, title: 'Introduction to React', type: 'video', course: 'React Fundamentals', status: 'published' },
-    { id: 2, title: 'Components and Props', type: 'text', course: 'React Fundamentals', status: 'draft' },
-    { id: 3, title: 'State Management', type: 'quiz', course: 'React Fundamentals', status: 'published' },
-    { id: 4, title: 'Hooks Tutorial', type: 'video', course: 'Advanced React', status: 'published' },
-  ];
+  const { content, uploadFile, fetchContent, createContent } = useContent();
 
   const columns = [
     { key: 'title', label: 'Title' },
@@ -23,7 +19,7 @@ const ContentManager: React.FC = () => {
     {
       key: 'actions',
       label: 'Actions',
-      render: (value: any, row: any) => (
+      render: (_value: any, _row: any) => (
         <div className="btn-group" role="group">
           <button className="btn btn-sm btn-outline-primary">Edit</button>
           <button className="btn btn-sm btn-outline-danger">Delete</button>
@@ -32,10 +28,26 @@ const ContentManager: React.FC = () => {
     },
   ];
 
-  const handleSubmit = (contentData: any) => {
-    console.log('Content submitted:', contentData);
-    setShowModal(false);
-    setEditingContent(null);
+  const handleSubmit = async (contentData: any) => {
+    try {
+      // If file is present, upload it first
+      let fileUrl = undefined;
+      if (contentData.file) {
+        const uploadResult = await uploadFile(contentData.file, contentData.type || 'document');
+        fileUrl = uploadResult?.url || uploadResult?.fileUrl;
+      }
+      // Prepare data for content creation (add fileUrl if present)
+      const payload = { ...contentData };
+      if (fileUrl) payload.fileUrl = fileUrl;
+      // Save metadata and fileUrl to backend (MongoDB)
+      await createContent(payload);
+      fetchContent();
+      setShowModal(false);
+      setEditingContent(null);
+    } catch (err) {
+      // handle error (show notification, etc.)
+      console.error('Error uploading/creating content:', err);
+    }
   };
 
   const handleEdit = (content: any) => {
@@ -63,7 +75,7 @@ const ContentManager: React.FC = () => {
           </div>
           <div className="card-body">
             <DataTable
-              data={contentItems}
+              data={content}
               columns={columns}
               onRowClick={handleEdit}
               striped
@@ -84,7 +96,7 @@ const ContentManager: React.FC = () => {
         >
           <ContentForm
             onSubmit={handleSubmit}
-            initialData={editingContent}
+            initialValues={editingContent}
           />
         </Modal>
       </div>

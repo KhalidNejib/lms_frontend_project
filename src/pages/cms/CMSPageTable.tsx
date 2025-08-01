@@ -53,7 +53,8 @@ const CMSPageTable: React.FC<Props> = ({ pages, onEdit, onDelete }) => {
     },
   ];
 
-  return <Table dataSource={pages} columns={columns} rowKey="_id" />;
+ 
+   return <Table dataSource={pages} columns={columns} rowKey="_id" />;
 };
 
 export default CMSPageTable;
