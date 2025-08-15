@@ -1,118 +1,114 @@
-import React, { useState } from 'react';
+import React, { useRef } from 'react';
+import { Row, Col, Typography, Carousel } from 'antd';
+import { LeftOutlined, RightOutlined } from '@ant-design/icons';
+import  SignUpForm from "../../components/forms/SignUpform"
+import TestimonialCard from '../../components/ui/TestimonialCard';
+import { motion } from 'framer-motion';
 
-const Register: React.FC = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-  });
+const { Title, Paragraph } = Typography;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle registration logic here
-    console.log('Register attempt:', formData);
-  };
+const testimonials = [
+  {
+    text: 'The course gave me a great foundation. Interactive, supportive, and well-paced!',
+    name: 'Sarah L.',
+    avatarUrl: 'https://api.dicebear.com/6.x/fun-emoji/svg?seed=Sarah',
+  },
+  {
+    text: 'Loved the hands-on projects. It boosted my confidence in real-world work.',
+    name: 'Daniel R.',
+    avatarUrl: 'https://api.dicebear.com/6.x/fun-emoji/svg?seed=Daniel',
+  },
+];
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+const SignUpPage: React.FC = () => {
+  const carouselRef = useRef<any>(null); // Carousel ref to control slides
 
   return (
-    <div className="container-fluid bg-light min-vh-100 d-flex align-items-center justify-content-center">
-      <div className="row justify-content-center w-100">
-        <div className="col-md-6 col-lg-4">
-          <div className="card shadow">
-            <div className="card-body p-5">
-              <div className="text-center mb-4">
-                <h2 className="card-title">Create your account</h2>
-                <p className="text-muted">Fill in the form below to create your account</p>
-              </div>
-              <form onSubmit={handleSubmit} className="needs-validation" noValidate>
-                <div className="mb-3">
-                  <label htmlFor="name" className="form-label">Full Name</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="name"
-                    id="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                  />
-                  <div className="invalid-feedback">
-                    Please enter your full name.
-                  </div>
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="email" className="form-label">Email address</label>
-                  <input
-                    type="email"
-                    className="form-control"
-                    name="email"
-                    id="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                  />
-                  <div className="invalid-feedback">
-                    Please enter a valid email address.
-                  </div>
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="password" className="form-label">Password</label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    name="password"
-                    id="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                  />
-                  <div className="invalid-feedback">
-                    Please enter a password.
-                  </div>
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    name="confirmPassword"
-                    id="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    required
-                  />
-                  <div className="invalid-feedback">
-                    Please confirm your password.
-                  </div>
-                </div>
-                <div className="mb-3 form-check">
-                  <input type="checkbox" className="form-check-input" id="agreeTerms" required />
-                  <label className="form-check-label" htmlFor="agreeTerms">
-                    I agree to the <a href="#" className="text-decoration-none">Terms of Service</a>
-                  </label>
-                </div>
-                <button type="submit" className="btn btn-primary w-100">
-                  Create Account
-                </button>
-              </form>
-              <div className="text-center mt-3">
-                <p className="mb-0">
-                  Already have an account? <a href="#" className="text-decoration-none">Sign in</a>
-                </p>
-              </div>
+    <div style={{ padding: '3rem 1rem', background: '#fafafa', minHeight: '100vh' }}>
+      <Row
+        gutter={[32, 32]}
+        justify="center"
+        align="middle"
+        style={{ maxWidth: 1200, margin: '0 auto' }}
+      >
+        <Col xs={24} md={12}>
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <Title level={3}>Students Testimonials</Title>
+            <Paragraph type="secondary">
+              Real stories from our students. Read how our LMS changed their learning journey.
+            </Paragraph>
+
+            <Carousel autoplay dots ref={carouselRef}>
+              {testimonials.map((t, i) => (
+                <TestimonialCard key={i} {...t} />
+              ))}
+            </Carousel>
+
+            {/* Arrows under the carousel */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: 16,
+                marginTop: 16,
+              }}
+            >
+              <button
+                onClick={() => carouselRef.current?.prev()}
+                style={arrowButtonStyle}
+              >
+                <LeftOutlined />
+              </button>
+              <button
+                onClick={() => carouselRef.current?.next()}
+                style={arrowButtonStyle}
+              >
+                <RightOutlined />
+              </button>
             </div>
-          </div>
-        </div>
-      </div>
+          </motion.div>
+        </Col>
+
+        <Col xs={24} md={12}>
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            style={{ background: '#fff', padding: '2rem', borderRadius: 8 }}
+          >
+          <SignUpForm/>
+          </motion.div>
+        </Col>
+      </Row>
     </div>
   );
 };
 
-export default Register; 
+const arrowButtonStyle: React.CSSProperties = {
+  width: 40,
+  height: 40,
+  borderRadius: '50%',
+  border: '1px solid #d9d9d9',
+  background: '#fff',
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  transition: 'all 0.3s ease',
+};
+
+export default SignUpPage;
+
+
+
+
+
+
+
+
+
+
