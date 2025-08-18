@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import ReactPlayer from "react-player";
@@ -45,7 +45,7 @@ export default function CoursePlayer() {
 
       {currentVideoUrl && (
         <div style={{ marginBottom: "24px" }}>
-          <ReactPlayer url={currentVideoUrl} controls width="100%" />
+          <ReactPlayer url={currentVideoUrl} controls width="100%" height="400px" />
         </div>
       )}
 

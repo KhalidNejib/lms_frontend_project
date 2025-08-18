@@ -1,5 +1,7 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import courseService, { Course, CreateCourseData, UpdateCourseData, CourseFilters } from '../services/course.service';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import courseService from '../services/course.service';
+import type { Course, CreateCourseData, UpdateCourseData, CourseFilters } from '../services/course.service';
 
 interface CourseState {
   courses: Course[];
@@ -161,7 +163,7 @@ const courseSlice = createSlice({
         state.error = action.error.message || 'Failed to delete course';
       })
       // Enroll in Course
-      .addCase(enrollInCourse.fulfilled, (state, action) => {
+      .addCase(enrollInCourse.fulfilled, (state) => {
         // Update enrollment status if needed
         state.error = null;
       })

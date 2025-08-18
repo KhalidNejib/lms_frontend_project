@@ -1,15 +1,31 @@
 import apiService from './api';
 
+interface Instructor {
+  _id: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface Pricing {
+  type: 'free' | 'paid' | 'subscription';
+  amount?: number;
+  currency?: string;
+  discount?: {
+    percentage?: number;
+    validUntil?: string;  // Dates usually serialized as strings
+  };
+}
+
 export interface Course {
-  id: string;
+  _id: string;
   title: string;
   description: string;
-  instructor: string;
+  instructor: Instructor;
   category: string;
   duration: string;
   students: number;
   rating: number;
-  price: number;
+   price: Pricing;
   image: string;
   status: 'draft' | 'published' | 'archived';
   createdAt: string;
@@ -25,7 +41,7 @@ export interface CreateCourseData {
 }
 
 export interface UpdateCourseData extends Partial<CreateCourseData> {
-  status?: 'draft' | 'published' | 'archived';
+  status?: 'draft' | 'published' |'pending'| 'approved'|'archived';
 }
 
 export interface CourseFilters {
@@ -85,8 +101,9 @@ class CourseService {
   }
 
   async getInstructorCourses(): Promise<Course[]> {
-    return apiService.get<Course[]>('/courses/instructor');
+    return apiService.get<Course[]>('/courses/instructors/me/courses');
   }
+  
 
   async uploadCourseImage(courseId: string, file: File): Promise<{ imageUrl: string }> {
     const formData = new FormData();

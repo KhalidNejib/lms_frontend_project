@@ -2,7 +2,7 @@ import React from 'react';
 
 const Sidebar: React.FC = () => (
   <aside className="col-md-3 col-lg-2 d-md-block bg-light sidebar">
-    <div className="position-sticky pt-3">
+    <div className="position-sticky pt-3 ">
       <ul className="nav flex-column">
         <li className="nav-item">
           <a className="nav-link active" href="#">

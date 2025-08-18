@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Layout from '../../components/common/Layout';
+import { Layout } from 'antd';
 
 const MediaLibrary: React.FC = () => {
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);

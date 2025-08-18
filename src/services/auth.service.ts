@@ -6,34 +6,59 @@ export interface LoginCredentials {
 }
 
 export interface RegisterData {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
+  role: 'student' | 'instructor' | 'admin' | 'content-manager';
 }
 
 export interface User {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
-  role: 'student' | 'instructor' | 'admin';
+  role: 'student' | 'instructor' | 'admin' | 'content-manager';
   avatar?: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface AuthResponse {
+export interface LoginResponse {
   user: User;
-  token: string;
+  accessToken: string;
   refreshToken?: string;
 }
 
-class AuthService {
-  async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    return apiService.post<AuthResponse>('/auth/login', credentials);
-  }
+export interface RegisterResponse {
+  user: User;
+  verificationToken: string;
+  message: string;
+}
 
-  async register(data: RegisterData): Promise<AuthResponse> {
-    return apiService.post<AuthResponse>('/auth/register', data);
+class AuthService {
+  async login(credentials: LoginCredentials): Promise<LoginResponse> {
+    try {
+      const response = await apiService.post<{ data: LoginResponse }>('/auth/login', credentials);
+      const { accessToken, refreshToken, user } = response.data;
+  
+      localStorage.setItem('accessToken', accessToken);
+      if (refreshToken) {
+        localStorage.setItem('refreshToken', refreshToken);
+      }
+  
+      return { user, accessToken, refreshToken };
+    } catch (error: any) {
+      if (error.response?.data?.message === 'Please verify your email before logging in.') {
+        throw new Error('Please verify your email before logging in.');
+      }
+      throw error;
+    }
+  }
+  
+
+  async register(data: RegisterData): Promise<RegisterResponse> {
+    return apiService.post<RegisterResponse>('/auth/register', data);
   }
 
   async logout(): Promise<void> {
@@ -42,8 +67,7 @@ class AuthService {
     } catch (error) {
       console.warn('Logout request failed:', error);
     } finally {
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
+      this.clearTokens();
     }
   }
 
@@ -51,28 +75,27 @@ class AuthService {
     return apiService.get<User>('/auth/me');
   }
 
-  async refreshToken(): Promise<{ token: string }> {
+  async refreshToken(): Promise<{ accessToken: string }> {
     const refreshToken = localStorage.getItem('refreshToken');
-    if (!refreshToken) {
-      throw new Error('No refresh token available');
-    }
-    
-    const response = await apiService.post<{ token: string }>('/auth/refresh', {
+    if (!refreshToken) throw new Error('No refresh token available');
+
+    const { accessToken } = await apiService.post<{ accessToken: string }>('/auth/refresh-token', {
       refreshToken,
     });
-    
-    localStorage.setItem('token', response.token);
-    return response;
+
+    localStorage.setItem('accessToken', accessToken);
+    return { accessToken };
   }
 
   async forgotPassword(email: string): Promise<{ message: string }> {
     return apiService.post<{ message: string }>('/auth/forgot-password', { email });
   }
 
-  async resetPassword(token: string, password: string): Promise<{ message: string }> {
+  async resetPassword(token: string, newPassword: string, confirmPassword: string): Promise<{ message: string }> {
     return apiService.post<{ message: string }>('/auth/reset-password', {
       token,
-      password,
+      newPassword,
+      confirmPassword,
     });
   }
 
@@ -83,36 +106,43 @@ class AuthService {
     });
   }
 
-  async updateProfile(data: Partial<User>): Promise<User> {
+  async updateProfinle(data: Partial<User>): Promise<User> {
     return apiService.put<User>('/auth/profile', data);
   }
 
+  async verifyEmail(token: string): Promise<{ message: string }> {
+    return apiService.get(`/auth/verifyemail/${token}`);
+  }
+
+  async resendVerification(email: string): Promise<{ message: string }> {
+    return apiService.post<{ message: string }>('/auth/resend-verification', { email });
+  }
+
   isAuthenticated(): boolean {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     if (!token) return false;
-    
+
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      const currentTime = Date.now() / 1000;
-      return payload.exp > currentTime;
+      return payload.exp > Date.now() / 1000;
     } catch {
       return false;
     }
   }
 
   getToken(): string | null {
-    return localStorage.getItem('token');
+    return localStorage.getItem('accessToken');
   }
 
   setToken(token: string): void {
-    localStorage.setItem('token', token);
+    localStorage.setItem('accessToken', token);
   }
 
   clearTokens(): void {
-    localStorage.removeItem('token');
+    localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
   }
 }
 
 export const authService = new AuthService();
-export default authService; 
+export default authService;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Layout from '../../components/common/Layout';
+import { Layout } from 'antd';
 import ContentForm from '../../components/forms/ContentForm';
 import DataTable from '../../components/ui/DataTable';
 import Modal from '../../components/ui/Modal';
@@ -23,7 +23,7 @@ const ContentManager: React.FC = () => {
     {
       key: 'actions',
       label: 'Actions',
-      render: (value: any, row: any) => (
+      render: () => (
         <div className="btn-group" role="group">
           <button className="btn btn-sm btn-outline-primary">Edit</button>
           <button className="btn btn-sm btn-outline-danger">Delete</button>

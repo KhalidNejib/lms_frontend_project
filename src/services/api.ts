@@ -1,14 +1,10 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
-interface ApiResponse<T> {
-  data: T;
-  message?: string;
-  error?: string;
-}
+import { authService } from './auth.service'; // import your authService
 
 class ApiService {
   private getHeaders(): HeadersInit {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     return {
       'Content-Type': 'application/json',
       ...(token && { Authorization: `Bearer ${token}` }),
@@ -23,52 +19,84 @@ class ApiService {
     return response.json();
   }
 
-  async get<T>(endpoint: string): Promise<T> {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: 'GET',
-      headers: this.getHeaders(),
-    });
+  // New helper: centralized fetch with refresh token retry
+  private async fetchWithAuth<T>(input: RequestInfo, init: RequestInit, retry = true): Promise<T> {
+    let response = await fetch(input, init);
+
+    if (response.status === 401 && retry) {
+      // Try refresh token
+      try {
+        await authService.refreshToken(); // This updates accessToken in localStorage
+
+        // Retry original request with new token
+        const newHeaders = {
+          ...init.headers,
+          Authorization: `Bearer ${authService.getToken()}`,
+        };
+        response = await fetch(input, { ...init, headers: newHeaders });
+      } catch (refreshError) {
+        // Refresh failed, clear tokens and redirect or throw error
+        authService.clearTokens();
+        // Optionally: window.location.href = '/login';
+        throw refreshError;
+      }
+    }
+
     return this.handleResponse<T>(response);
   }
 
+  async get<T>(endpoint: string): Promise<T> {
+    return this.fetchWithAuth<T>(`${API_BASE_URL}${endpoint}`, {
+      method: 'GET',
+      headers: this.getHeaders(),
+    });
+  }
+
   async post<T>(endpoint: string, data?: any): Promise<T> {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    return this.fetchWithAuth<T>(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
       headers: this.getHeaders(),
       body: data ? JSON.stringify(data) : undefined,
     });
-    return this.handleResponse<T>(response);
   }
 
   async put<T>(endpoint: string, data?: any): Promise<T> {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    return this.fetchWithAuth<T>(`${API_BASE_URL}${endpoint}`, {
       method: 'PUT',
       headers: this.getHeaders(),
       body: data ? JSON.stringify(data) : undefined,
     });
-    return this.handleResponse<T>(response);
   }
 
   async delete<T>(endpoint: string): Promise<T> {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    return this.fetchWithAuth<T>(`${API_BASE_URL}${endpoint}`, {
       method: 'DELETE',
       headers: this.getHeaders(),
     });
-    return this.handleResponse<T>(response);
   }
+  
+  async patch<T>(endpoint: string, data?: any): Promise<T> {
+    return this.fetchWithAuth<T>(`${API_BASE_URL}${endpoint}`, {
+      method: 'PATCH',
+      headers: this.getHeaders(),
+      body: data ? JSON.stringify(data) : undefined,
+    });
+  }
+  
+
+
 
   async upload<T>(endpoint: string, formData: FormData): Promise<T> {
-    const token = localStorage.getItem('token');
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const token = localStorage.getItem('accessToken');
+    return this.fetchWithAuth<T>(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
       headers: {
         ...(token && { Authorization: `Bearer ${token}` }),
       },
       body: formData,
     });
-    return this.handleResponse<T>(response);
   }
 }
 
 export const apiService = new ApiService();
-export default apiService; 
+export default apiService;

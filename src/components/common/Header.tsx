@@ -1,7 +1,13 @@
+
 import React, { useState } from 'react';
-import { Drawer } from 'antd';
-import { MenuOutlined, CloseOutlined } from '@ant-design/icons';
-import { Link, useLocation } from 'react-router-dom';
+import { Drawer, Dropdown, Avatar} from 'antd';
+import type { MenuProps } from 'antd';
+
+import { MenuOutlined, CloseOutlined, UserOutlined } from '@ant-design/icons';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import type { RootState } from '../../store';
+import  {logout} from '../../store/authSlice';
 import CustomButton from '../ui/CustomButton';
 
 const navItems = [
@@ -14,8 +20,51 @@ const navItems = [
 const Header: React.FC = () => {
   const [open, setOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
 
   const toggleDrawer = () => setOpen(!open);
+
+  const handleLogout = async () => {
+    await dispatch (logout());
+    navigate('/login');
+  };
+
+  const dropdownItems: MenuProps['items'] = [
+    {
+      key: 'dashboard',
+      label: (
+        <span onClick={() => {
+          switch (user?.role) {
+            case 'admin':
+              navigate('/dashboard/admin');
+              break;
+            case 'student':
+              navigate('/dashboard/student');
+              break;
+            case 'instructor':
+              navigate('/dashboard/instructor');
+              break;
+            default:
+              navigate('/');
+          }
+        }}>
+          Dashboard
+        </span>
+        
+      ),
+    },
+    {
+      key: 'profile',
+      label: <span onClick={() => navigate('/profile')}>Profile</span>,
+    },
+    {
+      key: 'logout',
+      label: <span onClick={handleLogout}>Logout</span>,
+    },
+  ];
 
   return (
     <header
@@ -32,10 +81,8 @@ const Header: React.FC = () => {
         flexWrap: 'wrap',
       }}
     >
-      {/* Logo */}
       <div style={{ fontWeight: 'bold', fontSize: '20px' }}>My LMS</div>
 
-      {/* Nav Links - center (hidden on mobile) */}
       <nav className="nav-items" style={{ display: 'flex', gap: '1.5rem', flexGrow: 1, justifyContent: 'center' }}>
         {navItems.map((item) => (
           <Link
@@ -50,36 +97,31 @@ const Header: React.FC = () => {
               borderBottom: location.pathname === item.to ? '2px solid #FF9500' : '2px solid transparent',
               transition: 'all 0.2s ease-in-out',
             }}
-            onMouseEnter={(e) => {
-              (e.target as HTMLElement).style.color = '#FF9500';
-              (e.target as HTMLElement).style.borderBottom = '2px solid #FF9500';
-            }}
-            onMouseLeave={(e) => {
-              const isActive = location.pathname === item.to;
-              (e.target as HTMLElement).style.color = isActive ? '#FF9500' : '#000';
-              (e.target as HTMLElement).style.borderBottom = isActive
-                ? '2px solid #FF9500'
-                : '2px solid transparent';
-            }}
           >
             {item.label}
           </Link>
         ))}
       </nav>
 
-      {/* Right Section: Buttons + Hamburger */}
+      {/* Right Section */}
       <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <CustomButton variant="secondary" size="md" className="login-btn">
-          Login
-        </CustomButton>
-        <CustomButton variant="primary" size="md" className="signup-btn">
-          Sign Up
-        </CustomButton>
-        <div
-          className="mobile-toggle"
-          aria-label="Toggle Navigation"
-          style={{ display: 'none', marginLeft: '8px' }}
-        >
+        {!isAuthenticated ? (
+          <>
+            <CustomButton variant="secondary" size="md" className="login-btn" onClick={() => navigate('/login')}>
+              Login
+            </CustomButton>
+            <CustomButton variant="primary" size="md" className="signup-btn" onClick={() => navigate('/register')}>
+              Sign Up
+            </CustomButton>
+          </>
+        ) : (
+          <Dropdown menu={{ items: dropdownItems }} placement="bottomRight" arrow>
+            <Avatar style={{ backgroundColor: '#FF9500', cursor: 'pointer' }}>
+              {user?.firstName?.charAt(0).toUpperCase() || <UserOutlined />}
+            </Avatar>
+          </Dropdown>
+        )}
+        <div className="mobile-toggle" aria-label="Toggle Navigation" style={{ display: 'none', marginLeft: '8px' }}>
           {open ? (
             <CloseOutlined style={{ fontSize: 24 }} onClick={toggleDrawer} />
           ) : (
@@ -88,14 +130,7 @@ const Header: React.FC = () => {
         </div>
       </div>
 
-      {/* Drawer - Mobile Nav Items only */}
-      <Drawer
-        placement="right"
-        closable={false}
-        onClose={toggleDrawer}
-        open={open}
-        bodyStyle={{ padding: '1.5rem' }}
-      >
+      <Drawer placement="right" closable={false} onClose={toggleDrawer} open={open} bodyStyle={{ padding: '1.5rem' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
           {navItems.map((item) => (
             <Link
@@ -115,7 +150,6 @@ const Header: React.FC = () => {
         </div>
       </Drawer>
 
-      {/* Responsive Styles */}
       <style>
         {`
           @media (max-width: 768px) {
@@ -147,3 +181,4 @@ const Header: React.FC = () => {
 };
 
 export default Header;
+

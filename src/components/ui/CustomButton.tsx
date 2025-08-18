@@ -1,4 +1,5 @@
-import React, { CSSProperties, useMemo } from 'react';
+import React, { useMemo } from 'react';
+import type { CSSProperties } from 'react';
 import { Button as AntButton, type ButtonProps as AntButtonProps } from 'antd';
 
 type Variant = 'primary' | 'secondary' | 'login' | 'google';
